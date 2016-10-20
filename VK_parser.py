@@ -14,6 +14,14 @@ class ParseFriends(BaseClient):
 
     def get_params(self):
         return 'user_id='+str(self.uid)+'&fields=bdate'
+    
+    def count_age(self,bdate,curdate):
+        years = curdate.year-bdate.year
+        if curdate.month < bdate.month or\
+        curdate.month == bdate.month and\
+        curdate.day < bdate.day:
+            years = years-1
+        return years
 
     def response_handler(self, response):
         friends = response.json()['response']
@@ -22,8 +30,7 @@ class ParseFriends(BaseClient):
             if 'bdate' in friend and friend['bdate'].count('.')==2:
                 bdate = datetime.strptime(friend['bdate'], "%d.%m.%Y")
                 curdate = datetime.now()
-                difdate = curdate-bdate
-                years = int(difdate.days // 365.25)
+                years = self.count_age(bdate, curdate)
                 if years not in hist:
                     hist[years] = 0
                 hist[years] = hist[years]+1
